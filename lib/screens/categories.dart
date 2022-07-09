@@ -1,40 +1,71 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+class Category {
+  int id;
+  String name;
+
+  Category({
+    required this.id,
+    required this.name,
+  });
+
+  factory Category.fromJson(Map<String, dynamic> json) {
+    return Category(id: json['id'], name: json['name']);
+  }
+}
 
 class Categories extends StatefulWidget {
+  const Categories({Key? key}) : super(key: key);
+
   @override
   CategoriesState createState() => CategoriesState();
 }
 
 class CategoriesState extends State<Categories> {
-  final List<String> categories = <String>[
-    'Category 1',
-    'Category 2',
-    'Category 3',
-  ];
+  late Future<List<Category>> futureCategories;
 
-  int clicked = 0;
+  Future<List<Category>> fetchCategories() async {
+    http.Response response = await http.get(
+      Uri.parse("http://127.0.0.1:8000/api/categories"),
+    );
+
+    List categories = jsonDecode(response.body);
+
+    return categories.map((category) => Category.fromJson(category)).toList();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    futureCategories = fetchCategories();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Categories clicked: ' + clicked.toString()),
-      ),
-      body: Container(
-        color: Theme.of(context).primaryColorDark,
-        child: Center(
-            child: ListView.builder(
-                itemCount: categories.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return ListTile(
-                    title: Text(
-                      categories[index],
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                    onTap: () => setState(() => clicked++),
-                  );
-                })),
-      ),
-    );
+        appBar: AppBar(
+          title: const Text('Categories'),
+        ),
+        body: FutureBuilder<List<Category>>(
+            future: futureCategories,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return ListView.builder(
+                    itemCount: snapshot.data!.length,
+                    itemBuilder: (context, index) {
+                      Category category = snapshot.data![index];
+                      return ListTile(
+                        title: Text(category.name),
+                      );
+                    });
+              } else if (snapshot.hasError) {
+                return const Text('Something went wrong');
+              }
+
+              return const CircularProgressIndicator();
+            }));
   }
 }
