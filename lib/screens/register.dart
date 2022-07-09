@@ -6,11 +6,13 @@ class Register extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Register'),
-        ),
-        body: Container(
-          color: Theme.of(context).primaryColorDark,
+      appBar: AppBar(
+        title: const Text('Register'),
+      ),
+      body: Container(
+        color: Theme.of(context).primaryColorDark,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
@@ -35,10 +37,13 @@ class Register extends StatelessWidget {
                       ),
                       const TextField(
                         keyboardType: TextInputType.visiblePassword,
-                        decoration: InputDecoration(labelText: 'Confirmed Password'),
+                        decoration:
+                            InputDecoration(labelText: 'Confirmed Password'),
                       ),
                       ElevatedButton(
-                        onPressed: () => print('Register clicked'),
+                        onPressed: () => {
+                          Navigator.pushNamed(context, '/categories'),
+                        },
                         child: const Text('Register'),
                         style: ElevatedButton.styleFrom(
                             minimumSize: const Size(double.infinity, 36)),
@@ -46,9 +51,7 @@ class Register extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(top: 20.0),
                         child: InkWell(
-                          onTap: () => {
-                            Navigator.pop(context)
-                          },
+                          onTap: () => {Navigator.pop(context)},
                           child: const Text('Back to Login'),
                         ),
                       ),
@@ -59,6 +62,7 @@ class Register extends StatelessWidget {
             ],
           ),
         ),
-      );
+      ),
+    );
   }
 }
