@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_expenses/screens/login.dart';
+import 'package:flutter_expenses/screens/register.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -8,45 +10,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Welcome to Flutter',
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Login'),
-        ),
-        body: Container(
-          color: Theme.of(context).primaryColorDark,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Card(
-                elevation: 8,
-                margin: EdgeInsets.only(left: 16.0, right: 16.0),
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Column(
-                    children: <Widget>[
-                      TextField(
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(labelText: 'Email'),
-                      ),
-                      TextField(
-                        keyboardType: TextInputType.visiblePassword,
-                        decoration: InputDecoration(labelText: 'Password'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () => print('Login clicked'),
-                        child: Text('Login'),
-                        style: ElevatedButton.styleFrom(
-                            minimumSize: Size(double.infinity, 36)),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+      title: 'Expenses App',
+      home: const Login(),
+      routes: {
+        '/login': (context) => const Login(),
+        '/register': (context) => const Register(),
+      },
     );
   }
 }
