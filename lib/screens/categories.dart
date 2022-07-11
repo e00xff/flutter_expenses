@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -21,11 +22,14 @@ class Categories extends StatefulWidget {
   const Categories({Key? key}) : super(key: key);
 
   @override
-  CategoriesState createState() => CategoriesState();
+  _CategoriesState createState() => _CategoriesState();
 }
 
-class CategoriesState extends State<Categories> {
+class _CategoriesState extends State<Categories> {
   late Future<List<Category>> futureCategories;
+  final _formKey = GlobalKey<FormState>();
+  late Category selectedCategory;
+  final categoryNameController = TextEditingController();
 
   Future<List<Category>> fetchCategories() async {
     http.Response response = await http.get(
@@ -35,6 +39,26 @@ class CategoriesState extends State<Categories> {
     List categories = jsonDecode(response.body);
 
     return categories.map((category) => Category.fromJson(category)).toList();
+  }
+
+  Future saveCategory() async {
+    final form = _formKey.currentState;
+
+    if(!form!.validate()) {
+      return;
+    }
+
+    String uri = 'http://127.0.0.1:8000/api/categories/' + selectedCategory.id.toString();
+
+    await http.put(Uri.parse(uri),
+      headers: {
+        HttpHeaders.contentTypeHeader: 'application/json',
+        HttpHeaders.acceptHeader: 'application/json',
+      },
+      body: jsonEncode({ 'name': categoryNameController.text })
+    );
+
+    Navigator.pop(context);
   }
 
   @override
@@ -59,6 +83,44 @@ class CategoriesState extends State<Categories> {
                       Category category = snapshot.data![index];
                       return ListTile(
                         title: Text(category.name),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: () {
+                            selectedCategory = category;
+                            categoryNameController.text = category.name;
+                            showModalBottomSheet(
+                                context: context,
+                                builder: (context) {
+                                  return Padding(
+                                    padding: const EdgeInsets.all(10),
+                                    child: Form(
+                                      key: _formKey,
+                                      child: Column(children: <Widget>[
+                                          TextFormField(
+                                            controller: categoryNameController,
+                                            validator: (String? value) {
+                                              if(value!.isEmpty) {
+                                                return 'Enter category name';
+                                              }
+
+                                              return null;
+                                            },
+                                            decoration: const InputDecoration(
+                                              border: OutlineInputBorder(),
+                                              labelText: 'Category Name',
+                                            ),
+                                          ),
+                                          ElevatedButton(
+                                              child: const Text('Save'),
+                                              onPressed: () => saveCategory()
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                });
+                          },
+                        ),
                       );
                     });
               } else if (snapshot.hasError) {
