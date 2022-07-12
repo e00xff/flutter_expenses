@@ -2,21 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-
-class Category {
-  int id;
-  String name;
-
-  Category({
-    required this.id,
-    required this.name,
-  });
-
-  factory Category.fromJson(Map<String, dynamic> json) {
-    return Category(id: json['id'], name: json['name']);
-  }
-}
+import 'package:flutter_expenses/models/Category.dart';
+import 'package:flutter_expenses/services/api.dart';
 
 class Categories extends StatefulWidget {
   const Categories({Key? key}) : super(key: key);
@@ -30,16 +17,8 @@ class _CategoriesState extends State<Categories> {
   final _formKey = GlobalKey<FormState>();
   late Category selectedCategory;
   final categoryNameController = TextEditingController();
+  ApiService apiService = ApiService();
 
-  Future<List<Category>> fetchCategories() async {
-    http.Response response = await http.get(
-      Uri.parse("http://127.0.0.1:8000/api/categories"),
-    );
-
-    List categories = jsonDecode(response.body);
-
-    return categories.map((category) => Category.fromJson(category)).toList();
-  }
 
   Future saveCategory() async {
     final form = _formKey.currentState;
@@ -48,15 +27,7 @@ class _CategoriesState extends State<Categories> {
       return;
     }
 
-    String uri = 'http://127.0.0.1:8000/api/categories/' + selectedCategory.id.toString();
-
-    await http.put(Uri.parse(uri),
-      headers: {
-        HttpHeaders.contentTypeHeader: 'application/json',
-        HttpHeaders.acceptHeader: 'application/json',
-      },
-      body: jsonEncode({ 'name': categoryNameController.text })
-    );
+    apiService.updateCategory(selectedCategory.id.toString(), categoryNameController.text);
 
     Navigator.pop(context);
   }
@@ -64,7 +35,7 @@ class _CategoriesState extends State<Categories> {
   @override
   void initState() {
     super.initState();
-    futureCategories = fetchCategories();
+    futureCategories = apiService.fetchCategories();
   }
 
   @override
@@ -90,6 +61,7 @@ class _CategoriesState extends State<Categories> {
                             categoryNameController.text = category.name;
                             showModalBottomSheet(
                                 context: context,
+                                isScrollControlled: true,
                                 builder: (context) {
                                   return Padding(
                                     padding: const EdgeInsets.all(10),
@@ -110,10 +82,22 @@ class _CategoriesState extends State<Categories> {
                                               labelText: 'Category Name',
                                             ),
                                           ),
-                                          ElevatedButton(
-                                              child: const Text('Save'),
-                                              onPressed: () => saveCategory()
-                                            ),
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: <Widget>[
+                                              ElevatedButton(
+                                                  child: const Text('Save'),
+                                                  onPressed: () => saveCategory()
+                                                ),
+                                              ElevatedButton(
+                                                  style: ElevatedButton.styleFrom(
+                                                    primary: Colors.red
+                                                  ),
+                                                  child: const Text('Cancel'),
+                                                  onPressed: () => Navigator.pop(context)
+                                                ),
+                                            ],
+                                          ),
                                         ],
                                       ),
                                     ),
