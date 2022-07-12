@@ -20,7 +20,7 @@ class ApiService {
 
   Future<Category> updateCategory(id, name) async {
 
-    String uri = baseUrl + '/categories' + id.toString();
+    String uri = baseUrl + 'categories/' + id.toString();
 
     http.Response response = await http.put(Uri.parse(uri),
       headers: {
@@ -29,6 +29,10 @@ class ApiService {
       },
       body: jsonEncode({ 'name': name }),
     );
+
+    if(response.statusCode != 200) {
+      throw Exception('Error happend on update');
+    }
 
     return Category.fromJson(jsonDecode(response.body));
   }

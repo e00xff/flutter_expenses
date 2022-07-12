@@ -5,7 +5,7 @@ import 'package:flutter_expenses/services/api.dart';
 class CategoryEdit extends StatefulWidget {
   final Category category;
 
-  CategoryEdit(this.category, {Key? key}) : super(key: key);
+  const CategoryEdit(this.category, {Key? key}) : super(key: key);
 
   @override
   _CategoryEditState createState() => _CategoryEditState();
@@ -15,6 +15,7 @@ class _CategoryEditState extends State<CategoryEdit> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final categoryNameController = TextEditingController();
   ApiService apiService = ApiService();
+  String errorMessage = '';
 
   @override
   void initState() {
@@ -55,6 +56,7 @@ class _CategoryEditState extends State<CategoryEdit> {
                     onPressed: () => Navigator.pop(context)),
               ],
             ),
+            Text(errorMessage, style: const TextStyle(color: Colors.red)),
           ],
         ),
       ),
@@ -63,6 +65,20 @@ class _CategoryEditState extends State<CategoryEdit> {
   }
 
   Future saveCategory() async {
+    final form = _formKey.currentState;
 
+    if(!form!.validate()) {
+      return;
+    }
+
+    apiService.updateCategory(widget.category.id, categoryNameController.text)
+    .then((Category category) => Navigator.pop(context))
+    .catchError((exception) {
+      setState(() {
+        errorMessage = exception.toString();
+      });
+    });
+    
+    
   }
 }
