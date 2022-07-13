@@ -35,4 +35,14 @@ class ApiService {
 
     return Category.fromJson(jsonDecode(response.body));
   }
+
+  Future<void> deleteCategory(id) async {
+    String uri = baseUrl + 'categories/' + id.toString();
+
+    http.Response response = await http.delete(Uri.parse(uri));
+
+    if (response.statusCode != 204) {
+      throw Exception('Error happend on delete');
+    }
+  }
 }

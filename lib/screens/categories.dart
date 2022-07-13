@@ -13,7 +13,6 @@ class Categories extends StatefulWidget {
 }
 
 class _CategoriesState extends State<Categories> {
-
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<CategoryProvider>(context);
@@ -29,18 +28,51 @@ class _CategoriesState extends State<Categories> {
               Category category = categories[index];
               return ListTile(
                 title: Text(category.name),
-                trailing: IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () {
-                    showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        builder: (context) {
-                          return CategoryEdit(category, provider.updateCategory);
-                        });
-                  },
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () {
+                        showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            builder: (BuildContext context) {
+                              return CategoryEdit(
+                                  category, provider.updateCategory);
+                            });
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () => showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: const Text('Confirmation'),
+                              content: const Text(
+                                  'Are you sure you want to delete?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => deleteCategory(provider.deleteCategory, category),
+                                  child: const Text('Confirm'),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text('Cancel'),
+                                ),
+                              ],
+                            );
+                          }),
+                    ),
+                  ],
                 ),
               );
             }));
+  }
+
+  Future deleteCategory(Function callback, Category category) async {
+    await callback(category);
+    Navigator.pop(context);
   }
 }
