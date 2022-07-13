@@ -3,6 +3,9 @@ import 'package:flutter_expenses/screens/categories.dart';
 import 'package:flutter_expenses/screens/login.dart';
 import 'package:flutter_expenses/screens/register.dart';
 
+import 'package:flutter_expenses/providers/CategoryProvider.dart';
+import 'package:provider/provider.dart';
+
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
@@ -10,14 +13,21 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Expenses App',
-      home: const Login(),
-      routes: {
-        '/login': (context) => const Login(),
-        '/register': (context) => const Register(),
-        '/categories': (context) => const Categories(),
-      },
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<CategoryProvider>(
+          create: (context) => CategoryProvider(),
+        ),
+      ],
+      child: MaterialApp(
+        title: 'Expenses App',
+        home: const Login(),
+        routes: {
+          '/login': (context) => const Login(),
+          '/register': (context) => const Register(),
+          '/categories': (context) => const Categories(),
+        },
+      ),
     );
   }
 }

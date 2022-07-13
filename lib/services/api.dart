@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_expenses/models/Category.dart';
 
 class ApiService {
-
   ApiService();
 
   final String baseUrl = 'http://127.0.0.1:8000/api/';
@@ -18,23 +17,22 @@ class ApiService {
     return categories.map((category) => Category.fromJson(category)).toList();
   }
 
-  Future<Category> updateCategory(id, name) async {
+  Future<Category> updateCategory(Category category) async {
+    String uri = baseUrl + 'categories/' + category.id.toString();
 
-    String uri = baseUrl + 'categories/' + id.toString();
-
-    http.Response response = await http.put(Uri.parse(uri),
+    http.Response response = await http.put(
+      Uri.parse(uri),
       headers: {
         HttpHeaders.contentTypeHeader: 'application/json',
         HttpHeaders.acceptHeader: 'application/json',
       },
-      body: jsonEncode({ 'name': name }),
+      body: jsonEncode({'name': category.name}),
     );
 
-    if(response.statusCode != 200) {
+    if (response.statusCode != 200) {
       throw Exception('Error happend on update');
     }
 
     return Category.fromJson(jsonDecode(response.body));
   }
-
 }

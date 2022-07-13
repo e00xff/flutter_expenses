@@ -4,8 +4,9 @@ import 'package:flutter_expenses/services/api.dart';
 
 class CategoryEdit extends StatefulWidget {
   final Category category;
+  final Function categoryCallback;
 
-  const CategoryEdit(this.category, {Key? key}) : super(key: key);
+  const CategoryEdit(this.category, this.categoryCallback, {Key? key}) : super(key: key);
 
   @override
   _CategoryEditState createState() => _CategoryEditState();
@@ -32,6 +33,7 @@ class _CategoryEditState extends State<CategoryEdit> {
         child: Column(
           children: <Widget>[
             TextFormField(
+              onChanged: (text) => setState(() => errorMessage = ''),
               controller: categoryNameController,
               validator: (String? value) {
                 if (value!.isEmpty) {
@@ -61,24 +63,18 @@ class _CategoryEditState extends State<CategoryEdit> {
         ),
       ),
     );
-    
   }
 
   Future saveCategory() async {
     final form = _formKey.currentState;
 
-    if(!form!.validate()) {
+    if (!form!.validate()) {
       return;
     }
 
-    apiService.updateCategory(widget.category.id, categoryNameController.text)
-    .then((Category category) => Navigator.pop(context))
-    .catchError((exception) {
-      setState(() {
-        errorMessage = exception.toString();
-      });
-    });
-    
-    
+    widget.category.name = categoryNameController.text;
+
+    await widget.categoryCallback(widget.category);
+    Navigator.pop(context);
   }
 }
