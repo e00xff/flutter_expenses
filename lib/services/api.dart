@@ -78,7 +78,7 @@ class ApiService {
         'name': name,
         'email': email,
         'password': password,
-        'password_confirm': passwordConfirm,
+        'password_confirmation': passwordConfirm,
         'device_name': deviceName,
       }),
     );

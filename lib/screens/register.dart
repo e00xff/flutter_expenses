@@ -80,9 +80,7 @@ class _RegisterState extends State<Register> {
                             }
                             return null;
                           },
-                          onChanged: (text) => setState(() {
-                            errorMessage = '';
-                          }),
+                          onChanged: (text) => setState(() => errorMessage = ''),
                           decoration: const InputDecoration(labelText: 'Password'),
                         ),
                         TextFormField(
@@ -96,9 +94,7 @@ class _RegisterState extends State<Register> {
                             }
                             return null;
                           },
-                          onChanged: (text) => setState(() {
-                            errorMessage = '';
-                          }),
+                          onChanged: (text) => setState(() => errorMessage = ''),
                           decoration: const InputDecoration(labelText: 'Confirm Password'),
                         ),
                         ElevatedButton(
@@ -137,8 +133,8 @@ class _RegisterState extends State<Register> {
       return;
     }
 
-    final AuthProvider provider =
-        Provider.of<AuthProvider>(context, listen: false);
+    final AuthProvider provider = Provider.of<AuthProvider>(context, listen: false);
+    
     try {
       String token = await provider.register(
           nameController.text,
