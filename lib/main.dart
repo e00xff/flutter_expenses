@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_expenses/providers/AuthProvider.dart';
 import 'package:flutter_expenses/screens/categories.dart';
+import 'package:flutter_expenses/screens/home.dart';
 import 'package:flutter_expenses/screens/login.dart';
 import 'package:flutter_expenses/screens/register.dart';
 
@@ -18,16 +20,23 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<CategoryProvider>(
           create: (context) => CategoryProvider(),
         ),
+        ChangeNotifierProvider<AuthProvider>(
+          create: (context) => AuthProvider(),
+        ),
       ],
-      child: MaterialApp(
-        title: 'Expenses App',
-        home: const Login(),
-        routes: {
-          '/login': (context) => const Login(),
-          '/register': (context) => const Register(),
-          '/categories': (context) => const Categories(),
+      child: MaterialApp(title: 'Expenses App', routes: {
+        '/': (context) {
+          final authProvider = Provider.of<AuthProvider>(context);
+          if (authProvider.isAuthenticated) {
+            return Home();
+          } else {
+            return Login();
+          }
         },
-      ),
+        '/login': (context) => Login(),
+        '/register': (context) => Register(),
+        '/categories': (context) => Categories(),
+      }),
     );
   }
 }
