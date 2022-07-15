@@ -1,6 +1,13 @@
+import 'dart:async';
+import 'dart:io';
+import 'package:flutter/services.dart';
+import 'package:device_info/device_info.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_expenses/providers/AuthProvider.dart';
 import 'package:provider/provider.dart';
+
+
 
 class Register extends StatefulWidget {
   const Register({Key? key}) : super(key: key);
@@ -18,6 +25,13 @@ class _RegisterState extends State<Register> {
   final passwordConfirmController = TextEditingController();
 
   String errorMessage = '';
+  late String deviceName;
+
+  @override
+  void initState() {
+    super.initState();
+    getDeviceName();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -141,7 +155,7 @@ class _RegisterState extends State<Register> {
           emailController.text,
           passwordController.text,
           passwordConfirmController.text,
-          'Some device name');
+          deviceName);
       Navigator.pop(context);
     } catch (Exception) {
       setState(() {
@@ -149,4 +163,53 @@ class _RegisterState extends State<Register> {
       });
     }
   }
+
+  Future<void> getDeviceName() async {
+
+    final deviceinf deviceInfoPlugin = DeviceInfoPlugin();
+
+    try {
+      if (Platform.isAndroid) {
+        var build = await deviceInfoPlugin.androidInfo;
+        setState(() {
+          deviceName = build.model;
+        });
+      } else if (Platform.isIOS) {
+        var build = await deviceInfoPlugin.iosInfo;
+        setState(() {
+          deviceName = build.model;
+        });
+      }
+    } on PlatformException {
+      setState(() {
+        deviceName = 'Failed to get platform version';
+      });
+    }
+
+  }
+
+
+
+  Future<void> initPlatformState() async {
+    Map<String, dynamic> deviceData = <String, dynamic>{};
+
+    try {
+      if (Platform.isAndroid) {
+        deviceData = _readAndroidBuildData(await deviceInfoPlugin.androidInfo);
+      } else if (Platform.isIOS) {
+        deviceData = _readIosDeviceInfo(await deviceInfoPlugin.iosInfo);
+      }
+    } on PlatformException {
+      deviceData = <String, dynamic>{
+        'Error:': 'Failed to get platform version.'
+      };
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      _deviceData = deviceData;
+    });
+  }
+
 }
