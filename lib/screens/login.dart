@@ -1,7 +1,23 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
 
-class Login extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:flutter_expenses/providers/AuthProvider.dart';
+import 'package:provider/provider.dart';
+
+class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
+
+  @override
+  State<Login> createState() => _LoginState();
+}
+
+class _LoginState extends State<Login> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  String errorMessage = '';
 
   @override
   Widget build(BuildContext context) {
@@ -21,22 +37,56 @@ class Login extends StatelessWidget {
                 margin: const EdgeInsets.only(left: 16.0, right: 16.0),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Column(
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                    
                     children: <Widget>[
-                      const TextField(
+
+                      // const TextField(
+                      //   keyboardType: TextInputType.emailAddress,
+                      //   decoration: InputDecoration(labelText: 'Email'),
+                      // ),
+                      // const TextField(
+                      //   keyboardType: TextInputType.visiblePassword,
+                      //   decoration: InputDecoration(labelText: 'Password'),
+                      // ),
+
+                      TextFormField(
                         keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(labelText: 'Email'),
+                        controller: emailController,
+                        validator: (String? value) {
+                          if (value!.isEmpty) {
+                            return 'Enter email';
+                          }
+                          return null;
+                        },
+                        onChanged: (text) => setState(() {
+                          errorMessage = '';
+                        }),
+                        decoration: const InputDecoration(labelText: 'Email'),
                       ),
-                      const TextField(
-                        keyboardType: TextInputType.visiblePassword,
-                        decoration: InputDecoration(labelText: 'Password'),
+                      TextFormField(
+                        obscureText: true,
+                        enableSuggestions: false,
+                        autocorrect: false,
+                        controller: passwordController,
+                        validator: (String? value) {
+                          if (value!.isEmpty) {
+                            return 'Enter password';
+                          }
+                          return null;
+                        },
+                        onChanged: (text) => setState(() => errorMessage = ''),
+                        decoration: const InputDecoration(labelText: 'Password'),
                       ),
                       ElevatedButton(
-                        onPressed: () => print('Login clicked'),
+                        onPressed: () => submit(),
                         child: const Text('Login'),
                         style: ElevatedButton.styleFrom(
                             minimumSize: const Size(double.infinity, 36)),
                       ),
+
                       Padding(
                         padding: const EdgeInsets.only(top: 20.0),
                         child: InkWell(
@@ -47,6 +97,7 @@ class Login extends StatelessWidget {
                       ),
                     ],
                   ),
+                  ),
                 ),
               ),
             ],
@@ -55,4 +106,27 @@ class Login extends StatelessWidget {
       ),
     );
   }
+
+  Future<void> submit() async {
+    final form = _formKey.currentState;
+
+    if (!form!.validate()) {
+      return;
+    }
+
+    final AuthProvider provider = Provider.of<AuthProvider>(context, listen: false);
+    
+    try {
+      String token = await provider.login(
+          emailController.text,
+          passwordController.text,
+          'Device name',
+      );
+    } catch (Exception) {
+      setState(() {
+        errorMessage = Exception.toString().replaceAll('Exception: ', '');
+      });
+    }
+  }
+
 }
