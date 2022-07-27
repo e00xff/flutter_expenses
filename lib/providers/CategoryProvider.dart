@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_expenses/models/Category.dart';
+import 'package:flutter_expenses/models/category.dart';
 import 'package:flutter_expenses/providers/AuthProvider.dart';
 import 'package:flutter_expenses/services/api.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CategoryProvider extends ChangeNotifier {
   List<Category> categories = [];
   late ApiService apiService;
   late AuthProvider authProvider;
 
-  CategoryProvider(AuthProvider authProvider)  {
+  CategoryProvider(AuthProvider authProvider) {
     this.authProvider = authProvider;
     this.apiService = ApiService(authProvider.token);
 
@@ -18,7 +19,7 @@ class CategoryProvider extends ChangeNotifier {
   Future init() async {
     categories = await apiService.fetchCategories();
     notifyListeners();
-  } 
+  }
 
   Future<void> addCategory(String name) async {
     try {
@@ -26,31 +27,31 @@ class CategoryProvider extends ChangeNotifier {
       categories.add(addedCategory);
 
       notifyListeners();
-    } catch(Exception) {
-      await authProvider.logout();
+    } catch (Exception) {
+      await authProvider.logOut();
     }
   }
 
   Future<void> updateCategory(Category category) async {
     try {
-      Category updateCategory = await apiService.updateCategory(category);
+      Category updatedCategory = await apiService.updateCategory(category);
       int index = categories.indexOf(category);
-      categories[index] = updateCategory;
+      categories[index] = updatedCategory;
 
       notifyListeners();
-    } catch(Exception) {
-      await authProvider.logout();
+    } catch (Exception) {
+      await authProvider.logOut();
     }
   }
 
   Future<void> deleteCategory(Category category) async {
     try {
       await apiService.deleteCategory(category.id);
-      categories.remove(category);
 
+      categories.remove(category);
       notifyListeners();
-    } catch(Exception) {
-      await authProvider.logout();
+    } catch (Exception) {
+      await authProvider.logOut();
     }
-  }  
+  }
 }

@@ -1,107 +1,106 @@
-import 'dart:async';
-
+import 'dart:io';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_expenses/providers/AuthProvider.dart';
 import 'package:provider/provider.dart';
+// import 'package:device_info/device_info.dart';
 
 class Login extends StatefulWidget {
-  const Login({Key? key}) : super(key: key);
+  Login();
 
   @override
-  State<Login> createState() => _LoginState();
+  _LoginState createState() => _LoginState();
 }
 
 class _LoginState extends State<Login> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-
+  late String deviceName;
   String errorMessage = '';
+
+  @override
+  void initState() {
+    super.initState();
+    // getDeviceName();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login'),
+        title: Text('Login'),
       ),
       body: Container(
         color: Theme.of(context).primaryColorDark,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Card(
-                elevation: 8,
-                margin: const EdgeInsets.only(left: 16.0, right: 16.0),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                    
-                    children: <Widget>[
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Card(
+                  elevation: 8,
+                  margin: EdgeInsets.only(left: 16, right: 16),
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        children: <Widget>[
+                          TextFormField(
+                            keyboardType: TextInputType.emailAddress,
+                            controller: emailController,
+                            decoration: InputDecoration(
+                              labelText: 'Email',
+                            ),
+                            validator: (String? value) {
+                              // Validation condition
+                              if (value!.trim().isEmpty) {
+                                return 'Please enter email';
+                              }
 
-                      // const TextField(
-                      //   keyboardType: TextInputType.emailAddress,
-                      //   decoration: InputDecoration(labelText: 'Email'),
-                      // ),
-                      // const TextField(
-                      //   keyboardType: TextInputType.visiblePassword,
-                      //   decoration: InputDecoration(labelText: 'Password'),
-                      // ),
+                              return null;
+                            },
+                          ),
+                          TextFormField(
+                            keyboardType: TextInputType.text,
+                            controller: passwordController,
+                            obscureText: true,
+                            autocorrect: false,
+                            enableSuggestions: false,
+                            decoration: InputDecoration(labelText: 'Password'),
+                            validator: (String? value) {
+                              // Validation condition
+                              if (value!.isEmpty) {
+                                return 'Please enter password';
+                              }
 
-                      TextFormField(
-                        keyboardType: TextInputType.emailAddress,
-                        controller: emailController,
-                        validator: (String? value) {
-                          if (value!.isEmpty) {
-                            return 'Enter email';
-                          }
-                          return null;
-                        },
-                        onChanged: (text) => setState(() {
-                          errorMessage = '';
-                        }),
-                        decoration: const InputDecoration(labelText: 'Email'),
+                              return null;
+                            },
+                          ),
+                          ElevatedButton(
+                            onPressed: () => submit(),
+                            child: Text('Login'),
+                            style: ElevatedButton.styleFrom(
+                                minimumSize: Size(double.infinity, 36)),
+                          ),
+                          Text(errorMessage, style: TextStyle(color: Colors.red)),
+                          Padding(
+                            padding: EdgeInsets.only(top: 20),
+                            child: InkWell(
+                              onTap: () {
+                                Navigator.pushNamed(context, '/register');
+                              },
+                              child: Text('Register New User',
+                                  style: TextStyle(fontSize: 14)),
+                            ),
+                          ),
+                        ],
                       ),
-                      TextFormField(
-                        obscureText: true,
-                        enableSuggestions: false,
-                        autocorrect: false,
-                        controller: passwordController,
-                        validator: (String? value) {
-                          if (value!.isEmpty) {
-                            return 'Enter password';
-                          }
-                          return null;
-                        },
-                        onChanged: (text) => setState(() => errorMessage = ''),
-                        decoration: const InputDecoration(labelText: 'Password'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () => submit(),
-                        child: const Text('Login'),
-                        style: ElevatedButton.styleFrom(
-                            minimumSize: const Size(double.infinity, 36)),
-                      ),
-
-                      Padding(
-                        padding: const EdgeInsets.only(top: 20.0),
-                        child: InkWell(
-                          onTap: () =>
-                              {Navigator.popAndPushNamed(context, '/register')},
-                          child: const Text('Register new user'),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
+              ]),
         ),
       ),
     );
@@ -115,12 +114,11 @@ class _LoginState extends State<Login> {
     }
 
     final AuthProvider provider = Provider.of<AuthProvider>(context, listen: false);
-    
     try {
       await provider.login(
           emailController.text,
           passwordController.text,
-          'Device name',
+          'device name'
       );
     } catch (Exception) {
       setState(() {
@@ -128,5 +126,27 @@ class _LoginState extends State<Login> {
       });
     }
   }
+
+  // Future<void> getDeviceName() async {
+  //   final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
+
+  //   try {
+  //     if (Platform.isAndroid) {
+  //       var build = await deviceInfoPlugin.androidInfo;
+  //       setState(() {
+  //         deviceName = build.model;
+  //       });
+  //     } else if (Platform.isIOS) {
+  //       var build = await deviceInfoPlugin.iosInfo;
+  //       setState(() {
+  //         deviceName = build.model;
+  //       });
+  //     }
+  //   } on PlatformException {
+  //     setState(() {
+  //       deviceName = 'Failed to get platform version';
+  //     });
+  //   }
+  // }
 
 }

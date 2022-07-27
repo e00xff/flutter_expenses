@@ -1,39 +1,54 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_expenses/services/api.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthProvider extends ChangeNotifier {
 
   bool isAuthenticated = false;
   late String token;
-  // late ApiService apiService;
+  late ApiService apiService;
 
-  ApiService apiService = new ApiService('');
+  AuthProvider() {
+    init();
+  }
 
-  // AuthProvider();
-
-  Future<void> register(String name, String email, String password, String passwordConfirm, String deviceName) async {
-
-    token = await apiService.register(name, email, password, passwordConfirm, deviceName);
+  Future<void> init() async {
+    this.token = await getToken();
+    if (this.token.isNotEmpty) {
+      this.isAuthenticated = true;
+    }
+    this.apiService = new ApiService(this.token);
     notifyListeners();
+  }
 
-    isAuthenticated = true;
-
+  Future<void> register(String name, String email, String password,
+      String passwordConfirm, String deviceName) async {
+    this.token = await apiService.register(name, email, password, passwordConfirm, deviceName);
+    setToken(this.token);
+    this.isAuthenticated = true;
+    notifyListeners();
   }
 
   Future<void> login(String email, String password, String deviceName) async {
-
-    token = await apiService.login(email, password, deviceName);
+    this.token = await apiService.login(email, password, deviceName);
+    setToken(this.token);
+    this.isAuthenticated = true;
     notifyListeners();
-
-    isAuthenticated = true;
-
   }
 
-  Future<void> logout() async {
+  Future<void> logOut() async {
+    setToken('');
+    this.isAuthenticated = false;
+    notifyListeners();
+  }
 
-    token = '';
-    isAuthenticated = false;
-    notifyListeners(); 
+  Future<void> setToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('token', token);
+  }
 
+  Future<String> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('token') ?? '';
   }
 }

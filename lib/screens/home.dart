@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_expenses/providers/AuthProvider.dart';
-
 import 'package:flutter_expenses/screens/categories.dart';
 import 'package:flutter_expenses/screens/transactions.dart';
-
 import 'package:provider/provider.dart';
 
 class Home extends StatefulWidget {
   @override
-  State<Home> createState() => _HomeState();
+  _HomeState createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
@@ -18,7 +16,7 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'My Expenses',
+      title: 'Welcome to Flutter',
       home: Scaffold(
         body: widgetOptions.elementAt(selectedIndex),
         bottomNavigationBar: BottomAppBar(
@@ -42,20 +40,20 @@ class _HomeState extends State<Home> {
             onTap: onItemTapped,
           ),
         ),
-
       ),
     );
   }
 
   Future<void> onItemTapped(int index) async {
-    if(index == 2) {
-      AuthProvider authProvider = Provider.of<AuthProvider>(context, listen:false);
-      await authProvider.logout();
+    if (index == 2) {
+      final AuthProvider provider =
+      Provider.of<AuthProvider>(context, listen: false);
+
+      await provider.logOut();
     } else {
       setState(() {
         selectedIndex = index;
       });
     }
   }
-
 }
